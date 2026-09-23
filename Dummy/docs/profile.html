@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Pengguna | ABSENSI KELAS X RPL 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text"><h2>X RPL 1</h2><span>SMKN 1 PROBOLINGGO</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title"><h1>Profil Pengguna</h1><p>SMKN 1 Probolinggo</p></div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 980px;">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-id-badge"></i> Data Akun</h3></div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+              <div class="user-avatar" style="width: 58px; height: 58px; font-size: 1.5rem;" id="profAvatar">U</div>
+              <div>
+                <h4 style="font-size: 1.15rem;" id="profName">Nama Pengguna</h4>
+                <span class="badge" style="background-color: rgba(59, 130, 246, 0.15); color: var(--primary); margin-top: 4px;" id="profRole">ROLE</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Username</span>
+                <p style="font-weight: 600; font-family: monospace;" id="profUsername">-</p>
+              </div>
+              <div>
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Sekolah</span>
+                <p style="font-weight: 600;">SMKN 1 Probolinggo</p>
+              </div>
+              <div>
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kelas</span>
+                <p style="font-weight: 600;">X RPL 1</p>
+              </div>
+              <div>
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Status Penyimpanan</span>
+                <p style="color: var(--status-hadir); font-weight: 600;"><i class="fas fa-check-circle"></i> LocalStorage / Offline Ready</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-key"></i> Ganti Password</h3></div>
+            <form id="passForm">
+              <div class="form-group">
+                <label class="form-label">Password Saat Ini</label>
+                <input type="password" id="curPass" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password Baru</label>
+                <input type="password" id="newPass" class="form-control" placeholder="Minimal 6 karakter" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Konfirmasi Password Baru</label>
+                <input type="password" id="confPass" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Perbarui Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+
+      document.getElementById('profAvatar').textContent = user.nama[0];
+      document.getElementById('profName').textContent = user.nama;
+      document.getElementById('profRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+      document.getElementById('profUsername').textContent = user.username;
+    }
+
+    function showToast(title, msg, type = 'success') {
+      const cont = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${msg}</div></div>`;
+      cont.appendChild(t);
+      setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    document.getElementById('passForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const cur = document.getElementById('curPass').value;
+      const nxt = document.getElementById('newPass').value;
+      const conf = document.getElementById('confPass').value;
+
+      if (nxt !== conf) { alert('Konfirmasi password tidak cocok!'); return; }
+      if (nxt.length < 6) { alert('Password minimal 6 karakter!'); return; }
+
+      let users = JSON.parse(localStorage.getItem(AbsensiDB.KEYS.USERS) || '[]');
+      const idx = users.findIndex(u => u.username === user.username && u.password === cur);
+      if (idx === -1) {
+        alert('Password saat ini salah!');
+        return;
+      }
+
+      users[idx].password = nxt;
+      localStorage.setItem(AbsensiDB.KEYS.USERS, JSON.stringify(users));
+      user.password = nxt;
+      localStorage.setItem(AbsensiDB.KEYS.CURRENT_USER, JSON.stringify(user));
+
+      showToast('Berhasil', 'Password Anda berhasil diperbarui!');
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>

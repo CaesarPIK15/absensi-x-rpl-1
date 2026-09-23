@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Profil Pengguna | {{ APP_NAME }}{% endblock %}
+{% block page_title %}Pengaturan Profil Pengguna{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 980px;">
+  <!-- Informasi Akun -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-id-badge"></i> Data Akun Pengguna
+      </h3>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+      <div class="user-avatar" style="width: 58px; height: 58px; font-size: 1.5rem;">
+        {{ current_user.nama[0] }}
+      </div>
+      <div>
+        <h4 style="font-size: 1.15rem; color: var(--text-main);">{{ current_user.nama }}</h4>
+        <span class="badge" style="background-color: rgba(59, 130, 246, 0.15); color: var(--primary); margin-top: 4px;">
+          <i class="fas fa-shield-alt"></i> {{ 'WALI KELAS' if current_user.role == 'wali_kelas' else 'KETUA KELAS' }}
+        </span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div>
+        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Username</span>
+        <p style="font-weight: 600; color: var(--text-main); font-family: monospace; font-size: 0.95rem;">{{ current_user.username }}</p>
+      </div>
+
+      <div>
+        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Sekolah</span>
+        <p style="font-weight: 600; color: var(--text-main);">{{ SCHOOL_NAME }}</p>
+      </div>
+
+      <div>
+        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kelas Binaan</span>
+        <p style="font-weight: 600; color: var(--text-main);">{{ CLASS_NAME }}</p>
+      </div>
+
+      <div>
+        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Status Sistem</span>
+        <p style="color: var(--status-hadir); font-weight: 600; font-size: 0.88rem;">
+          <i class="fas fa-check-circle"></i> Aktif & Terotentikasi
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Ganti Password -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-key"></i> Ganti Password
+      </h3>
+    </div>
+
+    <form id="changePasswordForm">
+      <div class="form-group">
+        <label class="form-label" for="currentPassword">Password Saat Ini</label>
+        <input 
+          type="password" 
+          id="currentPassword" 
+          class="form-control" 
+          placeholder="Masukkan password saat ini" 
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="newPassword">Password Baru</label>
+        <input 
+          type="password" 
+          id="newPassword" 
+          class="form-control" 
+          placeholder="Minimal 6 karakter" 
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirmPassword">Konfirmasi Password Baru</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          class="form-control" 
+          placeholder="Ketik ulang password baru" 
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="savePasswordBtn" style="width: 100%; margin-top: 10px;">
+        <i class="fas fa-save"></i> Perbarui Password
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('changePasswordForm');
+  const btn = document.getElementById('savePasswordBtn');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const current_password = document.getElementById('currentPassword').value.trim();
+      const new_password = document.getElementById('newPassword').value.trim();
+      const confirm_password = document.getElementById('confirmPassword').value.trim();
+
+      if (new_password !== confirm_password) {
+        Toast.error('Konfirmasi password tidak cocok dengan password baru!');
+        return;
+      }
+
+      if (new_password.length < 6) {
+        Toast.warning('Password baru minimal harus 6 karakter.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+      const res = await apiRequest('/api/profile/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ current_password, new_password, confirm_password })
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Perbarui Password';
+
+      if (res.ok && res.data.success) {
+        Toast.success(res.data.message || 'Password berhasil diperbarui!');
+        form.reset();
+      } else {
+        Toast.error(res.data.message || 'Gagal mengubah password.');
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

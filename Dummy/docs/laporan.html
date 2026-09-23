@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan & Rekapitulasi | ABSENSI KELAS X RPL 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="print-header">
+    <h2>PEMERINTAH PROVINSI JAWA TIMUR</h2>
+    <h2>DINAS PENDIDIKAN</h2>
+    <h3>SEKOLAH MENENGAH KEJURUAN NEGERI 1 PROBOLINGGO</h3>
+    <p>Jl. Mastrip No. 355, Kec. Kanigaran, Kota Probolinggo, Jawa Timur 67219</p>
+    <p style="margin-top: 10px; font-weight: bold; font-size: 11pt;">REKAPITULASI KEHADIRAN SISWA KELAS X RPL 1</p>
+    <p id="printPeriodText" style="font-size: 10pt; font-weight: bold;"></p>
+  </div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text"><h2>X RPL 1</h2><span>SMKN 1 PROBOLINGGO</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item active"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title"><h1>Laporan & Rekap Presensi</h1><p>Kelas X RPL 1</p></div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="card no-print" style="margin-bottom: 24px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between;">
+            <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Periode</label>
+                <select id="repPeriod" class="form-control" style="width: 170px;">
+                  <option value="bulanan" selected>Bulan Ini</option>
+                  <option value="mingguan">7 Hari Terakhir</option>
+                  <option value="harian">Hari Ini</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" id="btnCsv"><i class="fas fa-file-excel" style="color: var(--status-hadir);"></i> Export CSV</button>
+              <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Cetak Laporan</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid no-print">
+          <div class="stat-card hadir"><div class="stat-info"><p>TOTAL HADIR</p><h3 id="sHadir">0</h3></div><div class="stat-icon"><i class="fas fa-user-check"></i></div></div>
+          <div class="stat-card sakit"><div class="stat-info"><p>TOTAL SAKIT</p><h3 id="sSakit">0</h3></div><div class="stat-icon"><i class="fas fa-thermometer-half"></i></div></div>
+          <div class="stat-card izin"><div class="stat-info"><p>TOTAL IZIN</p><h3 id="sIzin">0</h3></div><div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div></div>
+          <div class="stat-card alpa"><div class="stat-info"><p>TOTAL ALPA</p><h3 id="sAlpa">0</h3></div><div class="stat-icon"><i class="fas fa-user-times"></i></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header no-print">
+            <h3 class="card-title"><i class="fas fa-table"></i> Rekapitulasi Siswa</h3>
+            <span id="recapLabel" style="color: var(--accent-cyan); font-weight: 600;">Periode</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No</th>
+                  <th style="width: 90px;">NIS</th>
+                  <th>Nama Siswa</th>
+                  <th style="width: 60px; text-align: center;">L/P</th>
+                  <th style="width: 70px; text-align: center;">Hadir</th>
+                  <th style="width: 70px; text-align: center;">Sakit</th>
+                  <th style="width: 70px; text-align: center;">Izin</th>
+                  <th style="width: 70px; text-align: center;">Alpa</th>
+                  <th style="width: 110px; text-align: center;">% Kehadiran</th>
+                </tr>
+              </thead>
+              <tbody id="recapBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="print-signatures">
+          <div class="print-sign-box">
+            <p>Mengetahui,</p><p>Ketua Kelas X RPL 1</p>
+            <div class="print-sign-space"></div>
+            <p style="text-decoration: underline; font-weight: bold;">Ahmad Rizky Pratama</p>
+            <p>NIS. 1003</p>
+          </div>
+          <div class="print-sign-box">
+            <p>Probolinggo, <span id="printDateSign"></span></p><p>Wali Kelas X RPL 1</p>
+            <div class="print-sign-space"></div>
+            <p style="text-decoration: underline; font-weight: bold;">Dra. Hj. Nurul Hidayati, M.Kom</p>
+            <p>NIP. 19750812 200501 2 004</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+    }
+
+    const today = new Date();
+    document.getElementById('printDateSign').textContent = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    let lastReportData = null;
+
+    function loadReports() {
+      const type = document.getElementById('repPeriod').value;
+      const today = new Date();
+      let sDate, eDate = today.toISOString().split('T')[0];
+
+      if (type === 'harian') {
+        sDate = eDate;
+      } else if (type === 'mingguan') {
+        const last = new Date(); last.setDate(today.getDate() - 6);
+        sDate = last.toISOString().split('T')[0];
+      } else {
+        const first = new Date(today.getFullYear(), today.getMonth(), 1);
+        sDate = first.toISOString().split('T')[0];
+      }
+
+      const rep = AbsensiDB.getReports(sDate, eDate);
+      lastReportData = rep;
+
+      document.getElementById('recapLabel').textContent = `${rep.start_date} s.d. ${rep.end_date}`;
+      document.getElementById('printPeriodText').textContent = `Periode: ${rep.start_date} s.d. ${rep.end_date}`;
+
+      document.getElementById('sHadir').textContent = rep.summary.hadir;
+      document.getElementById('sSakit').textContent = rep.summary.sakit;
+      document.getElementById('sIzin').textContent = rep.summary.izin;
+      document.getElementById('sAlpa').textContent = rep.summary.alpa;
+
+      const tbody = document.getElementById('recapBody');
+      tbody.innerHTML = rep.students_recap.map((r, idx) => `
+        <tr>
+          <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
+          <td style="font-family: monospace; font-weight: 600; color: var(--accent-cyan);">${r.nis}</td>
+          <td style="font-weight: 600;">${r.nama}</td>
+          <td style="text-align: center;">${r.jenis_kelamin}</td>
+          <td style="text-align: center; font-weight: 600; color: var(--status-hadir);">${r.hadir}</td>
+          <td style="text-align: center; font-weight: 600; color: var(--status-sakit);">${r.sakit}</td>
+          <td style="text-align: center; font-weight: 600; color: var(--status-izin);">${r.izin}</td>
+          <td style="text-align: center; font-weight: 600; color: var(--status-alpa);">${r.alpa}</td>
+          <td style="text-align: center; font-weight: 700; color: ${r.persentase < 75 ? 'var(--status-alpa)' : 'var(--status-hadir)'};">${r.persentase}%</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('btnCsv').addEventListener('click', () => {
+      if (!lastReportData) return;
+      let csv = "No,NIS,Nama Siswa,L/P,Hadir,Sakit,Izin,Alpa,Total Hari,Persentase Kehadiran\n";
+      lastReportData.students_recap.forEach((r, i) => {
+        csv += `${i + 1},"${r.nis}","${r.nama}","${r.jenis_kelamin}",${r.hadir},${r.sakit},${r.izin},${r.alpa},${r.total_hari},"${r.persentase}%"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rekap_Absensi_XRPL1_${lastReportData.start_date}_sd_${lastReportData.end_date}.csv`;
+      a.click();
+    });
+
+    document.getElementById('repPeriod').addEventListener('change', loadReports);
+    loadReports();
+  </script>
+</body>
+</html>

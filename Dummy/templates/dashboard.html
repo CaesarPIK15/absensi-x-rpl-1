@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | {{ APP_NAME }}{% endblock %}
+{% block page_title %}Dashboard Kelas{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+  <div class="welcome-text">
+    <h2>Selamat datang, {{ current_user.nama }}! 👋</h2>
+    <p>
+      Sistem Presensi Siswa <strong>{{ CLASS_NAME }}</strong> Tahun Ajaran {{ ACADEMIC_YEAR }} 
+      di <strong>{{ SCHOOL_NAME }}</strong>. Pantau kehadiran siswa secara akurat dan real-time.
+    </p>
+    <div class="welcome-badge-group">
+      <div class="welcome-tag"><i class="fas fa-school"></i> {{ SCHOOL_NAME }}</div>
+      <div class="welcome-tag"><i class="fas fa-users-class"></i> Kelas: {{ CLASS_NAME }}</div>
+      <div class="welcome-tag"><i class="fas fa-user-shield"></i> Role: {{ 'WALI KELAS' if current_user.role == 'wali_kelas' else 'KETUA KELAS' }}</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <a href="{{ url_for('absensi') }}" class="btn btn-primary">
+      <i class="fas fa-edit"></i> Absensi Hari Ini
+    </a>
+    <button class="btn btn-secondary" id="refreshDashboardBtn" title="Segarkan Data">
+      <i class="fas fa-sync-alt"></i> Segarkan
+    </button>
+  </div>
+</div>
+
+<!-- 5 Real-Time Stat Cards -->
+<div class="stats-grid">
+  <!-- Total Siswa -->
+  <div class="stat-card total">
+    <div class="stat-info">
+      <p>TOTAL SISWA</p>
+      <h3 id="statTotalSiswa">0</h3>
+    </div>
+    <div class="stat-icon">
+      <i class="fas fa-users"></i>
+    </div>
+  </div>
+
+  <!-- Hadir -->
+  <div class="stat-card hadir">
+    <div class="stat-info">
+      <p>HADIR</p>
+      <h3 id="statHadir">0</h3>
+    </div>
+    <div class="stat-icon">
+      <i class="fas fa-user-check"></i>
+    </div>
+  </div>
+
+  <!-- Sakit -->
+  <div class="stat-card sakit">
+    <div class="stat-info">
+      <p>SAKIT</p>
+      <h3 id="statSakit">0</h3>
+    </div>
+    <div class="stat-icon">
+      <i class="fas fa-thermometer-half"></i>
+    </div>
+  </div>
+
+  <!-- Izin -->
+  <div class="stat-card izin">
+    <div class="stat-info">
+      <p>IZIN</p>
+      <h3 id="statIzin">0</h3>
+    </div>
+    <div class="stat-icon">
+      <i class="fas fa-envelope-open-text"></i>
+    </div>
+  </div>
+
+  <!-- Alpa -->
+  <div class="stat-card alpa">
+    <div class="stat-info">
+      <p>ALPA</p>
+      <h3 id="statAlpa">0</h3>
+    </div>
+    <div class="stat-icon">
+      <i class="fas fa-user-times"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Grid Baris 2: Grafik Kehadiran & Meter Persentase -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 28px;">
+  <!-- Card Grafik Kehadiran 7 Hari -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-chart-bar"></i> Tren Kehadiran (7 Hari Terakhir)
+      </h3>
+      <div style="display: flex; gap: 12px; font-size: 0.78rem;">
+        <span style="color: var(--status-hadir);"><i class="fas fa-circle"></i> Hadir</span>
+        <span style="color: var(--status-sakit);"><i class="fas fa-circle"></i> Sakit</span>
+        <span style="color: var(--status-izin);"><i class="fas fa-circle"></i> Izin</span>
+        <span style="color: var(--status-alpa);"><i class="fas fa-circle"></i> Alpa</span>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="attendanceChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Card Tingkat Kehadiran Hari Ini -->
+  <div class="card" style="display: flex; flex-direction: column; justify-content: center; text-align: center;">
+    <div class="card-header" style="justify-content: center;">
+      <h3 class="card-title">
+        <i class="fas fa-percentage"></i> Kehadiran Hari Ini
+      </h3>
+    </div>
+    <div class="percentage-ring-container">
+      <div class="percentage-value" id="statPersentaseHadir">0%</div>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+        Persentase siswa hadir hari ini
+      </p>
+      <!-- Progress Bar Visual -->
+      <div style="width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 10px; margin-top: 16px; overflow: hidden; border: 1px solid var(--border-color);">
+        <div id="progressBarHadir" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); transition: width 0.6s ease;"></div>
+      </div>
+    </div>
+    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+      <a href="{{ url_for('laporan') }}" class="btn btn-secondary btn-sm" style="width: 100%;">
+        <i class="fas fa-file-invoice"></i> Lihat Rekap Lengkap
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Card Aktivitas Absensi Terbaru -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fas fa-history"></i> Aktivitas Absensi Terbaru
+    </h3>
+    <a href="{{ url_for('riwayat') }}" class="btn btn-secondary btn-sm">
+      Semua Riwayat <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+  <div id="recentActivitiesList">
+    <div style="text-align: center; padding: 24px; color: var(--text-muted);">
+      <i class="fas fa-spinner fa-spin"></i> Memuat aktivitas...
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

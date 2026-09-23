@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Riwayat Absensi | {{ APP_NAME }}{% endblock %}
+{% block page_title %}Riwayat Absensi Siswa{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+  <!-- Filter Form -->
+  <form id="historyFilterForm">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: flex-end;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="historyStartDate">Dari Tanggal</label>
+        <input type="date" id="historyStartDate" class="form-control">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="historyEndDate">Sampai Tanggal</label>
+        <input type="date" id="historyEndDate" class="form-control">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="historyStatusFilter">Status</label>
+        <select id="historyStatusFilter" class="form-control">
+          <option value="">Semua Status</option>
+          <option value="Hadir">Hadir</option>
+          <option value="Sakit">Sakit</option>
+          <option value="Izin">Izin</option>
+          <option value="Alpa">Alpa</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="historySearchInput">Cari Siswa</label>
+        <input type="text" id="historySearchInput" class="form-control" placeholder="Nama / NIS...">
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="submit" class="btn btn-primary" style="flex: 1;">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+        <button type="button" class="btn btn-secondary" id="resetHistoryFilterBtn" title="Reset Filter">
+          <i class="fas fa-undo"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fas fa-list-alt"></i> Log Rekam Kehadiran
+    </h3>
+    <span id="historyTotalCount" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">
+      Total: 0 rekaman
+    </span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th style="width: 110px;">Tanggal</th>
+          <th style="width: 90px;">NIS</th>
+          <th>Nama Siswa</th>
+          <th style="width: 100px;">Status</th>
+          <th>Keterangan</th>
+          <th style="width: 90px;">Waktu</th>
+          <th style="width: 120px;">Diinput Oleh</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody">
+        <!-- Rendered via riwayat.js -->
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 20px; display: flex; justify-content: flex-end;" id="historyPagination">
+    <!-- Rendered via riwayat.js -->
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/riwayat.js') }}"></script>
+{% endblock %}

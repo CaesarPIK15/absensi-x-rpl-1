@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login Absensi Kelas X RPL 1 SMKN 1 Probolinggo">
+  <title>Login | Absensi Kelas X RPL 1 - SMKN 1 Probolinggo</title>
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page-body">
+
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-icon">
+        <i class="fas fa-terminal"></i>
+      </div>
+      <h1>ABSENSI KELAS X RPL 1</h1>
+      <p>SMKN 1 PROBOLINGGO</p>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="loginErrorAlert" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px;"></div>
+
+    <!-- Role Selection Tabs -->
+    <div class="role-tabs">
+      <div class="role-tab active" data-role="ketua_kelas">
+        <i class="fas fa-user-edit"></i> Ketua Kelas
+      </div>
+      <div class="role-tab" data-role="wali_kelas">
+        <i class="fas fa-user-tie"></i> Wali Kelas
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+      <input type="hidden" id="selectedRole" value="ketua_kelas">
+
+      <div class="form-group">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-user"></i>
+          <input 
+            type="text" 
+            id="username" 
+            class="form-control" 
+            placeholder="Masukkan username Anda" 
+            required 
+            autocomplete="username"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-lock"></i>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-control" 
+            placeholder="Masukkan password Anda" 
+            required 
+            autocomplete="current-password"
+          >
+          <button type="button" class="password-toggle-btn" id="togglePasswordBtn" title="Tampilkan Password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submitLoginBtn" style="width: 100%; margin-top: 10px; padding: 12px;">
+        <i class="fas fa-sign-in-alt"></i> Masuk Sekarang
+      </button>
+    </form>
+
+    <!-- Akun Pengujian Cepat -->
+    <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border-color); text-align: center;">
+      <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px;">
+        Akun Testing Cepat (Klik untuk isi otomatis):
+      </p>
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="fillKetuaBtn" title="Username: ketua_kelas, Pass: ketua123">
+          <i class="fas fa-key"></i> Ketua Kelas
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="fillWaliBtn" title="Username: wali_kelas, Pass: wali123">
+          <i class="fas fa-key"></i> Wali Kelas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    // Theme auto-apply
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const roleTabs = document.querySelectorAll('.role-tab');
+    const roleInput = document.getElementById('selectedRole');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginForm = document.getElementById('loginForm');
+    const errorAlert = document.getElementById('loginErrorAlert');
+
+    roleTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        roleTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        roleInput.value = tab.getAttribute('data-role');
+      });
+    });
+
+    document.getElementById('togglePasswordBtn').addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+    });
+
+    document.getElementById('fillKetuaBtn').addEventListener('click', () => {
+      usernameInput.value = 'ketua_kelas';
+      passwordInput.value = 'ketua123';
+      setRole('ketua_kelas');
+    });
+
+    document.getElementById('fillWaliBtn').addEventListener('click', () => {
+      usernameInput.value = 'wali_kelas';
+      passwordInput.value = 'wali123';
+      setRole('wali_kelas');
+    });
+
+    function setRole(role) {
+      roleInput.value = role;
+      roleTabs.forEach(t => {
+        if (t.getAttribute('data-role') === role) t.classList.add('active');
+        else t.classList.remove('active');
+      });
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const res = AbsensiDB.login(usernameInput.value.trim(), passwordInput.value.trim(), roleInput.value);
+      if (res.success) {
+        window.location.href = 'dashboard.html';
+      } else {
+        errorAlert.textContent = res.message;
+        errorAlert.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Data Siswa | {{ APP_NAME }}{% endblock %}
+{% block page_title %}Data Siswa {{ CLASS_NAME }}{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+    <!-- Badges Statistik Siswa -->
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <span class="badge" style="background-color: var(--bg-card); font-size: 0.85rem; padding: 6px 14px;">
+        <i class="fas fa-users" style="color: var(--primary);"></i> Total: <strong id="totalStudentBadge" style="margin-left: 4px;">0</strong> Siswa
+      </span>
+      <span class="badge badge-gender-l" style="font-size: 0.85rem; padding: 6px 14px;">
+        <i class="fas fa-mars"></i> Laki-laki: <strong id="totalLakiBadge" style="margin-left: 4px;">0</strong>
+      </span>
+      <span class="badge badge-gender-p" style="font-size: 0.85rem; padding: 6px 14px;">
+        <i class="fas fa-venus"></i> Perempuan: <strong id="totalPeremBadge" style="margin-left: 4px;">0</strong>
+      </span>
+    </div>
+
+    <!-- Tombol Khusus Wali Kelas -->
+    {% if current_user.role == 'wali_kelas' %}
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" onclick="openModal('importCsvModal')">
+        <i class="fas fa-file-csv"></i> Import CSV
+      </button>
+      <button class="btn btn-primary" onclick="openModal('addStudentModal')">
+        <i class="fas fa-user-plus"></i> Tambah Siswa
+      </button>
+    </div>
+    {% else %}
+    <div style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">
+      <i class="fas fa-info-circle"></i> Mode hanya-lihat (Ketua Kelas).
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <!-- Search & Filter Bar -->
+  <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+    <div class="input-icon-wrapper" style="max-width: 320px; flex: 1;">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        id="searchStudentInput" 
+        class="form-control" 
+        placeholder="Cari nama atau NIS siswa..."
+      >
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label for="filterGenderSelect" style="font-size: 0.82rem; color: var(--text-secondary); white-space: nowrap;">
+        Jenis Kelamin:
+      </label>
+      <select id="filterGenderSelect" class="form-control" style="width: 150px; padding: 8px 12px;">
+        <option value="">Semua (L & P)</option>
+        <option value="L">Laki-laki</option>
+        <option value="P">Perempuan</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;">No</th>
+          <th style="width: 100px;">NIS</th>
+          <th>Nama Lengkap</th>
+          <th style="width: 140px;">Jenis Kelamin</th>
+          <th style="width: 120px;">Kelas</th>
+          <th style="width: 120px;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="studentsTableBody">
+        <!-- Rendered via siswa.js -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==========================================
+     MODALS
+     ========================================== -->
+
+<!-- Modal Tambah Siswa -->
+<div class="modal-backdrop" id="addStudentModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-plus" style="color: var(--primary);"></i> Tambah Siswa Baru</h3>
+      <button class="modal-close-btn" onclick="closeModal('addStudentModal')">&times;</button>
+    </div>
+    <form id="addStudentForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="addNis">Nomor Induk Siswa (NIS)</label>
+          <input type="text" id="addNis" class="form-control" placeholder="Contoh: 1037" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="addNama">Nama Lengkap Siswa</label>
+          <input type="text" id="addNama" class="form-control" placeholder="Nama siswa" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="addJenisKelamin">Jenis Kelamin</label>
+          <select id="addJenisKelamin" class="form-control" required>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="addKelas">Kelas</label>
+          <input type="text" id="addKelas" class="form-control" value="X RPL 1" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('addStudentModal')">Batal</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Siswa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Edit Siswa -->
+<div class="modal-backdrop" id="editStudentModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3><i class="fas fa-edit" style="color: var(--primary);"></i> Edit Data Siswa</h3>
+      <button class="modal-close-btn" onclick="closeModal('editStudentModal')">&times;</button>
+    </div>
+    <form id="editStudentForm">
+      <input type="hidden" id="editStudentId">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="editNis">Nomor Induk Siswa (NIS)</label>
+          <input type="text" id="editNis" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editNama">Nama Lengkap Siswa</label>
+          <input type="text" id="editNama" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editJenisKelamin">Jenis Kelamin</label>
+          <select id="editJenisKelamin" class="form-control" required>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editKelas">Kelas</label>
+          <input type="text" id="editKelas" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editStudentModal')">Batal</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Perbarui Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Siswa -->
+<div class="modal-backdrop" id="deleteConfirmModal">
+  <div class="modal-dialog" style="max-width: 440px;">
+    <div class="modal-header">
+      <h3 style="color: var(--status-alpa);"><i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus</h3>
+      <button class="modal-close-btn" onclick="closeModal('deleteConfirmModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Apakah Anda yakin ingin menghapus data siswa <strong id="deleteStudentNameTarget" style="color: var(--text-main);"></strong>?
+      </p>
+      <p style="font-size: 0.8rem; color: var(--status-alpa); margin-top: 8px;">
+        Semua riwayat absensi siswa ini juga akan terhapus secara permanen.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Batal</button>
+      <button type="button" class="btn btn-danger" onclick="executeDeleteStudent()">
+        <i class="fas fa-trash-alt"></i> Ya, Hapus Siswa
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Import CSV -->
+<div class="modal-backdrop" id="importCsvModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3><i class="fas fa-file-csv" style="color: var(--accent-cyan);"></i> Import Siswa dari CSV</h3>
+      <button class="modal-close-btn" onclick="closeModal('importCsvModal')">&times;</button>
+    </div>
+    <form id="importCsvForm">
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+          Unggah file CSV dengan urutan kolom: <strong>NIS, Nama Siswa, Jenis Kelamin (L/P), Kelas</strong>.
+        </p>
+
+        <div style="background-color: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px dashed var(--border-color); font-size: 0.78rem; font-family: monospace; color: var(--accent-cyan); margin-bottom: 16px;">
+          nis,nama,jenis_kelamin,kelas<br>
+          1001,Achmad Maulana,L,X RPL 1<br>
+          1002,Adelia Putri,P,X RPL 1
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="csvFileInput">Pilih File CSV</label>
+          <input type="file" id="csvFileInput" class="form-control" accept=".csv" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('importCsvModal')">Batal</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Unggah & Impor</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/siswa.js') }}"></script>
+{% endblock %}

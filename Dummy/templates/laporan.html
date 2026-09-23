@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Laporan & Rekapitulasi | {{ APP_NAME }}{% endblock %}
+{% block page_title %}Laporan Presensi Siswa{% endblock %}
+
+{% block content %}
+<!-- Formal Kop Surat SMKN 1 Probolinggo (Hanya muncul saat Print) -->
+<div class="print-header">
+  <h2>PEMERINTAH PROVINSI JAWA TIMUR</h2>
+  <h2>DINAS PENDIDIKAN</h2>
+  <h3>SEKOLAH MENENGAH KEJURUAN NEGERI 1 PROBOLINGGO</h3>
+  <p>Jl. Mastrip No. 355, Kec. Kanigaran, Kota Probolinggo, Jawa Timur 67219</p>
+  <p style="margin-top: 10px; font-weight: bold; font-size: 11pt;">
+    REKAPITULASI KEHADIRAN SISWA KELAS {{ CLASS_NAME }}
+  </p>
+  <p id="printPeriodText" style="font-size: 10pt; font-weight: bold;"></p>
+</div>
+
+<!-- Filter Bar (Disembunyikan saat print) -->
+<div class="card no-print" style="margin-bottom: 24px;">
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between;">
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+      <!-- Pilihan Periode -->
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="reportPeriodType">Periode Laporan</label>
+        <select id="reportPeriodType" class="form-control" style="width: 170px;">
+          <option value="bulanan" selected>Bulan Ini</option>
+          <option value="mingguan">7 Hari Terakhir</option>
+          <option value="harian">Hari Ini</option>
+          <option value="custom">Rentang Kustom</option>
+        </select>
+      </div>
+
+      <!-- Kustom Rentang Tanggal (Hidden default) -->
+      <div id="customDateRangeGroup" style="display: none; gap: 8px; align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="reportStartDate">Mulai</label>
+          <input type="date" id="reportStartDate" class="form-control">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="reportEndDate">Selesai</label>
+          <input type="date" id="reportEndDate" class="form-control">
+        </div>
+        <button class="btn btn-primary" id="generateReportBtn">
+          <i class="fas fa-sync-alt"></i> Terapkan
+        </button>
+      </div>
+    </div>
+
+    <!-- Tombol Aksi: Cetak & Export -->
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" id="exportCsvBtn" title="Export ke format spreadsheet CSV">
+        <i class="fas fa-file-excel" style="color: var(--status-hadir);"></i> Export CSV
+      </button>
+      <button class="btn btn-primary" id="printReportBtn" title="Cetak Dokumen Laporan Resmi">
+        <i class="fas fa-print"></i> Cetak Laporan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Ringkasan Statistik Periode (No-Print) -->
+<div class="stats-grid no-print">
+  <div class="stat-card hadir">
+    <div class="stat-info">
+      <p>TOTAL HADIR</p>
+      <h3 id="sumHadir">0</h3>
+    </div>
+    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+  </div>
+
+  <div class="stat-card sakit">
+    <div class="stat-info">
+      <p>TOTAL SAKIT</p>
+      <h3 id="sumSakit">0</h3>
+    </div>
+    <div class="stat-icon"><i class="fas fa-thermometer-half"></i></div>
+  </div>
+
+  <div class="stat-card izin">
+    <div class="stat-info">
+      <p>TOTAL IZIN</p>
+      <h3 id="sumIzin">0</h3>
+    </div>
+    <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
+  </div>
+
+  <div class="stat-card alpa">
+    <div class="stat-info">
+      <p>TOTAL ALPA</p>
+      <h3 id="sumAlpa">0</h3>
+    </div>
+    <div class="stat-icon"><i class="fas fa-user-times"></i></div>
+  </div>
+</div>
+
+<!-- Tabel Rekapitulasi -->
+<div class="card">
+  <div class="card-header no-print">
+    <h3 class="card-title">
+      <i class="fas fa-table"></i> Rekapitulasi Siswa
+    </h3>
+    <span id="recapPeriodText" style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 600;">
+      Periode Berjalan
+    </span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;">No</th>
+          <th style="width: 90px;">NIS</th>
+          <th>Nama Siswa</th>
+          <th style="width: 60px; text-align: center;">L/P</th>
+          <th style="width: 70px; text-align: center;">Hadir</th>
+          <th style="width: 70px; text-align: center;">Sakit</th>
+          <th style="width: 70px; text-align: center;">Izin</th>
+          <th style="width: 70px; text-align: center;">Alpa</th>
+          <th style="width: 110px; text-align: center;">% Kehadiran</th>
+        </tr>
+      </thead>
+      <tbody id="reportTableBody">
+        <!-- Rendered via laporan.js -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bagian Tanda Tangan Cetak (Hanya tampil saat Print) -->
+<div class="print-signatures">
+  <div class="print-sign-box">
+    <p>Mengetahui,</p>
+    <p>Ketua Kelas {{ CLASS_NAME }}</p>
+    <div class="print-sign-space"></div>
+    <p style="text-decoration: underline; font-weight: bold;">Ahmad Rizky Pratama</p>
+    <p>NIS. 1003</p>
+  </div>
+
+  <div class="print-sign-box">
+    <p>Probolinggo, {{ today_formatted }}</p>
+    <p>Wali Kelas {{ CLASS_NAME }}</p>
+    <div class="print-sign-space"></div>
+    <p style="text-decoration: underline; font-weight: bold;">Dra. Hj. Nurul Hidayati, M.Kom</p>
+    <p>NIP. 19750812 200501 2 004</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/laporan.js') }}"></script>
+{% endblock %}

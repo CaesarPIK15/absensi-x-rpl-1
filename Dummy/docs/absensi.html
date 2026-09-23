@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absensi Harian | ABSENSI KELAS X RPL 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text"><h2>X RPL 1</h2><span>SMKN 1 PROBOLINGGO</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item active"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title"><h1>Absensi Harian Siswa</h1><p>Kelas X RPL 1</p></div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="attDate" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);"><i class="far fa-calendar-alt"></i> Tanggal:</label>
+                <input type="date" id="attDate" class="form-control" style="width: 170px; padding: 8px 12px;">
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btnAllHadir"><i class="fas fa-check-double" style="color: var(--status-hadir);"></i> Tandai Semua Hadir</button>
+            </div>
+            <button class="btn btn-success" id="btnSaveAttendance" style="padding: 10px 22px;"><i class="fas fa-save"></i> Simpan Absensi</button>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+            <span class="badge" style="background-color: var(--bg-card);">Total: <strong id="cntTotal" style="margin-left: 4px;">0</strong></span>
+            <span class="badge badge-hadir">Hadir: <strong id="cntHadir" style="margin-left: 4px;">0</strong></span>
+            <span class="badge badge-sakit">Sakit: <strong id="cntSakit" style="margin-left: 4px;">0</strong></span>
+            <span class="badge badge-izin">Izin: <strong id="cntIzin" style="margin-left: 4px;">0</strong></span>
+            <span class="badge badge-alpa">Alpa: <strong id="cntAlpa" style="margin-left: 4px;">0</strong></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+            <div class="input-icon-wrapper" style="max-width: 320px; flex: 1;">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchStudent" class="form-control" placeholder="Cari nama atau NIS siswa...">
+            </div>
+            <select id="filterStatus" class="form-control" style="width: 140px; padding: 8px 12px;">
+              <option value="">Semua Status</option>
+              <option value="Hadir">Hadir</option>
+              <option value="Sakit">Sakit</option>
+              <option value="Izin">Izin</option>
+              <option value="Alpa">Alpa</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No</th>
+                  <th style="width: 90px;">NIS</th>
+                  <th>Nama Siswa</th>
+                  <th style="width: 50px; text-align: center;">L/P</th>
+                  <th style="width: 320px;">Status Kehadiran</th>
+                  <th>Keterangan</th>
+                  <th style="width: 80px; text-align: center;">Waktu</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+    }
+
+    // Toast
+    function showToast(title, msg, type = 'success') {
+      const cont = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${msg}</div></div>`;
+      cont.appendChild(t);
+      setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    // Logic Absensi
+    const dateInput = document.getElementById('attDate');
+    dateInput.value = new Date().toISOString().split('T')[0];
+    let currentList = [];
+
+    function loadDaily() {
+      currentList = AbsensiDB.getDailyAttendance(dateInput.value);
+      renderTable();
+      updateCounters();
+    }
+
+    function renderTable() {
+      const search = (document.getElementById('searchStudent').value || '').toLowerCase();
+      const statusF = document.getElementById('filterStatus').value;
+      const tbody = document.getElementById('attendanceTableBody');
+
+      const filtered = currentList.filter(item => {
+        const matchS = !search || item.nama.toLowerCase().includes(search) || item.nis.includes(search);
+        const matchSt = !statusF || item.status === statusF;
+        return matchS && matchSt;
+      });
+
+      tbody.innerHTML = filtered.map((item, idx) => `
+        <tr>
+          <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
+          <td style="font-family: monospace; font-weight: 600; color: var(--accent-cyan);">${item.nis}</td>
+          <td style="font-weight: 600;">
+            ${item.nama}
+            ${item.is_recorded ? '<span style="color: var(--status-hadir); margin-left: 6px;"><i class="fas fa-check-circle"></i></span>' : ''}
+          </td>
+          <td style="text-align: center;">
+            <span class="badge ${item.jenis_kelamin === 'L' ? 'badge-gender-l' : 'badge-gender-p'}">${item.jenis_kelamin}</span>
+          </td>
+          <td>
+            <div class="status-pill-group">
+              ${['Hadir', 'Sakit', 'Izin', 'Alpa'].map(st => `
+                <label class="status-pill-opt">
+                  <input type="radio" name="st_${item.student_id}" value="${st}" ${item.status === st ? 'checked' : ''} onchange="setStatus(${item.student_id}, '${st}')">
+                  <span class="pill-${st.toLowerCase()}">${st}</span>
+                </label>
+              `).join('')}
+            </div>
+          </td>
+          <td>
+            <input type="text" class="form-control" style="padding: 6px 10px; font-size: 0.82rem;" placeholder="Keterangan..." value="${item.keterangan || ''}" onchange="setKet(${item.student_id}, this.value)">
+          </td>
+          <td style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">${item.waktu_absen || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.setStatus = (id, st) => {
+      const itm = currentList.find(s => s.student_id === id);
+      if (itm) { itm.status = st; updateCounters(); }
+    };
+    window.setKet = (id, txt) => {
+      const itm = currentList.find(s => s.student_id === id);
+      if (itm) itm.keterangan = txt;
+    };
+
+    function updateCounters() {
+      document.getElementById('cntTotal').textContent = currentList.length;
+      document.getElementById('cntHadir').textContent = currentList.filter(s => s.status === 'Hadir').length;
+      document.getElementById('cntSakit').textContent = currentList.filter(s => s.status === 'Sakit').length;
+      document.getElementById('cntIzin').textContent = currentList.filter(s => s.status === 'Izin').length;
+      document.getElementById('cntAlpa').textContent = currentList.filter(s => s.status === 'Alpa').length;
+    }
+
+    document.getElementById('btnAllHadir').addEventListener('click', () => {
+      currentList.forEach(s => s.status = 'Hadir');
+      renderTable();
+      updateCounters();
+      showToast('Tandai Cepat', 'Semua siswa ditandai Hadir.', 'info');
+    });
+
+    document.getElementById('btnSaveAttendance').addEventListener('click', () => {
+      const res = AbsensiDB.saveAttendance(dateInput.value, currentList);
+      showToast('Tersimpan', res.message, 'success');
+      loadDaily();
+    });
+
+    dateInput.addEventListener('change', loadDaily);
+    document.getElementById('searchStudent').addEventListener('input', renderTable);
+    document.getElementById('filterStatus').addEventListener('change', renderTable);
+
+    loadDaily();
+  </script>
+</body>
+</html>

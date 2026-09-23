@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | ABSENSI KELAS X RPL 1 - SMKN 1 Probolinggo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>X RPL 1</h2>
+          <span>SMKN 1 PROBOLINGGO</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item active"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);">
+          <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title">
+            <h1>Dashboard Kelas</h1>
+            <p id="topbarDate">Memuat tanggal...</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="Ganti Tema"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h2>Selamat datang, <span id="welcomeUserName">Pengguna</span>! 👋</h2>
+            <p>Sistem Presensi Siswa <strong>X RPL 1</strong> di <strong>SMKN 1 Probolinggo</strong>. Pantau kehadiran siswa secara real-time di GitHub Pages.</p>
+            <div class="welcome-badge-group">
+              <div class="welcome-tag"><i class="fas fa-school"></i> SMKN 1 Probolinggo</div>
+              <div class="welcome-tag"><i class="fas fa-users-class"></i> Kelas: X RPL 1</div>
+              <div class="welcome-tag"><i class="fas fa-user-shield"></i> <span id="welcomeUserRole">ROLE</span></div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <a href="absensi.html" class="btn btn-primary"><i class="fas fa-edit"></i> Absensi Hari Ini</a>
+          </div>
+        </div>
+
+        <!-- 5 Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card total">
+            <div class="stat-info"><p>TOTAL SISWA</p><h3 id="statTotalSiswa">0</h3></div>
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+          </div>
+          <div class="stat-card hadir">
+            <div class="stat-info"><p>HADIR</p><h3 id="statHadir">0</h3></div>
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+          </div>
+          <div class="stat-card sakit">
+            <div class="stat-info"><p>SAKIT</p><h3 id="statSakit">0</h3></div>
+            <div class="stat-icon"><i class="fas fa-thermometer-half"></i></div>
+          </div>
+          <div class="stat-card izin">
+            <div class="stat-info"><p>IZIN</p><h3 id="statIzin">0</h3></div>
+            <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
+          </div>
+          <div class="stat-card alpa">
+            <div class="stat-info"><p>ALPA</p><h3 id="statAlpa">0</h3></div>
+            <div class="stat-icon"><i class="fas fa-user-times"></i></div>
+          </div>
+        </div>
+
+        <!-- Grid 2: Grafik & Meter -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 28px;">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-bar"></i> Tren Kehadiran (7 Hari Terakhir)</h3>
+              <div style="display: flex; gap: 12px; font-size: 0.78rem;">
+                <span style="color: var(--status-hadir);"><i class="fas fa-circle"></i> Hadir</span>
+                <span style="color: var(--status-sakit);"><i class="fas fa-circle"></i> Sakit</span>
+                <span style="color: var(--status-izin);"><i class="fas fa-circle"></i> Izin</span>
+                <span style="color: var(--status-alpa);"><i class="fas fa-circle"></i> Alpa</span>
+              </div>
+            </div>
+            <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
+          </div>
+
+          <div class="card" style="display: flex; flex-direction: column; justify-content: center; text-align: center;">
+            <div class="card-header" style="justify-content: center;">
+              <h3 class="card-title"><i class="fas fa-percentage"></i> Kehadiran Hari Ini</h3>
+            </div>
+            <div class="percentage-ring-container">
+              <div class="percentage-value" id="statPersentaseHadir">0%</div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">Persentase siswa hadir hari ini</p>
+              <div style="width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 10px; margin-top: 16px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div id="progressBarHadir" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); transition: width 0.6s ease;"></div>
+              </div>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+              <a href="laporan.html" class="btn btn-secondary btn-sm" style="width: 100%;"><i class="fas fa-file-invoice"></i> Lihat Rekap Lengkap</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history"></i> Aktivitas Absensi Terbaru</h3>
+            <a href="riwayat.html" class="btn btn-secondary btn-sm">Semua Riwayat <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <div id="recentActivitiesList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+      loadDashboard();
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    // Sidebar Mobile
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    // Populate user
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+      document.getElementById('welcomeUserName').textContent = user.nama;
+      document.getElementById('welcomeUserRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+    }
+
+    const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+    const months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    const today = new Date();
+    document.getElementById('topbarDate').textContent = `${days[today.getDay()]}, ${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+
+    // Load Data
+    function loadDashboard() {
+      const d = AbsensiDB.getDashboardStats();
+      document.getElementById('statTotalSiswa').textContent = d.total_students;
+      document.getElementById('statHadir').textContent = d.hadir;
+      document.getElementById('statSakit').textContent = d.sakit;
+      document.getElementById('statIzin').textContent = d.izin;
+      document.getElementById('statAlpa').textContent = d.alpa;
+      document.getElementById('statPersentaseHadir').textContent = `${d.persentase_hadir}%`;
+      document.getElementById('progressBarHadir').style.width = `${d.persentase_hadir}%`;
+
+      renderChart(d.chart);
+      renderActivities(d.recent_activities);
+    }
+
+    function renderChart(chartData) {
+      const canvas = document.getElementById('attendanceChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const labels = chartData.labels || [];
+      const count = labels.length;
+      if (count === 0) return;
+
+      const pL = 40, pR = 20, pT = 20, pB = 40;
+      const cW = w - pL - pR, cH = h - pT - pB;
+      const maxVal = 36;
+
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+      ctx.font = '11px Plus Jakarta Sans, sans-serif';
+
+      // Grid
+      for (let i = 0; i <= 4; i++) {
+        const yVal = Math.round((maxVal / 4) * i);
+        const yPos = h - pB - (cH / 4) * i;
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        ctx.beginPath(); ctx.moveTo(pL, yPos); ctx.lineTo(w - pR, yPos); ctx.stroke();
+        ctx.textAlign = 'right'; ctx.fillText(yVal, pL - 8, yPos + 4);
+      }
+
+      const gW = cW / count;
+      const bW = Math.min(14, (gW - 10) / 4);
+
+      labels.forEach((lbl, idx) => {
+        const gx = pL + idx * gW + (gW / 2);
+        ctx.textAlign = 'center';
+        ctx.fillText(lbl, gx, h - pB + 20);
+
+        const stats = [
+          { val: chartData.hadir[idx], col: '#10b981' },
+          { val: chartData.sakit[idx], col: '#f59e0b' },
+          { val: chartData.izin[idx], col: '#0284c7' },
+          { val: chartData.alpa[idx], col: '#ef4444' }
+        ];
+
+        stats.forEach((s, sIdx) => {
+          const bh = (s.val / maxVal) * cH;
+          const bx = gx - (bW * 2) + (sIdx * bW);
+          const by = h - pB - bh;
+          ctx.fillStyle = s.col;
+          ctx.fillRect(bx, by, bW - 2, bh);
+        });
+      });
+    }
+
+    function renderActivities(list) {
+      const container = document.getElementById('recentActivitiesList');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">Belum ada riwayat tercatat.</p>';
+        return;
+      }
+      container.innerHTML = list.map(item => {
+        let bCol = 'badge-hadir', icon = 'fa-check';
+        if (item.status === 'Sakit') { bCol = 'badge-sakit'; icon = 'fa-thermometer-half'; }
+        else if (item.status === 'Izin') { bCol = 'badge-izin'; icon = 'fa-envelope-open-text'; }
+        else if (item.status === 'Alpa') { bCol = 'badge-alpa'; icon = 'fa-times'; }
+
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background-color: var(--bg-card); font-weight: 700;">
+                ${item.jenis_kelamin || 'L'}
+              </div>
+              <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">${item.nama}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">NIS: ${item.nis} &bull; ${item.tanggal} (${item.waktu_absen})</div>
+              </div>
+            </div>
+            <span class="badge ${bCol}"><i class="fas ${icon}"></i> ${item.status}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

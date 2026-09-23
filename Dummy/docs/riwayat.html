@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Absensi | ABSENSI KELAS X RPL 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text"><h2>X RPL 1</h2><span>SMKN 1 PROBOLINGGO</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item active"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title"><h1>Riwayat Absensi Siswa</h1><p>Kelas X RPL 1</p></div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Dari Tanggal</label>
+              <input type="date" id="histStart" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Sampai Tanggal</label>
+              <input type="date" id="histEnd" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Status</label>
+              <select id="histStatus" class="form-control">
+                <option value="">Semua Status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Izin">Izin</option>
+                <option value="Alpa">Alpa</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Cari Nama/NIS</label>
+              <input type="text" id="histSearch" class="form-control" placeholder="Nama/NIS...">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list-alt"></i> Log Rekam Kehadiran</h3>
+            <span id="histCount" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Total: 0</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 110px;">Tanggal</th>
+                  <th style="width: 90px;">NIS</th>
+                  <th>Nama Siswa</th>
+                  <th style="width: 100px;">Status</th>
+                  <th>Keterangan</th>
+                  <th style="width: 90px;">Waktu</th>
+                  <th style="width: 120px;">Diinput Oleh</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+    }
+
+    function loadHistory() {
+      const sDate = document.getElementById('histStart').value;
+      const eDate = document.getElementById('histEnd').value;
+      const statusF = document.getElementById('histStatus').value;
+      const search = (document.getElementById('histSearch').value || '').toLowerCase();
+
+      let list = JSON.parse(localStorage.getItem(AbsensiDB.KEYS.ATTENDANCE) || '[]');
+      if (sDate) list = list.filter(a => a.tanggal >= sDate);
+      if (eDate) list = list.filter(a => a.tanggal <= eDate);
+      if (statusF) list = list.filter(a => a.status === statusF);
+      if (search) list = list.filter(a => (a.nama && a.nama.toLowerCase().includes(search)) || (a.nis && a.nis.includes(search)));
+
+      list.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+      document.getElementById('histCount').textContent = `Total: ${list.length} rekaman`;
+
+      const tbody = document.getElementById('historyTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data riwayat absensi.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.slice(0, 100).map(r => {
+        let bCol = 'badge-hadir', icon = 'fa-check';
+        if (r.status === 'Sakit') { bCol = 'badge-sakit'; icon = 'fa-thermometer-half'; }
+        else if (r.status === 'Izin') { bCol = 'badge-izin'; icon = 'fa-envelope-open-text'; }
+        else if (r.status === 'Alpa') { bCol = 'badge-alpa'; icon = 'fa-times'; }
+
+        return `
+          <tr>
+            <td style="font-family: monospace; font-weight: 600;">${r.tanggal}</td>
+            <td style="font-family: monospace; font-weight: 600; color: var(--accent-cyan);">${r.nis}</td>
+            <td style="font-weight: 600;">${r.nama}</td>
+            <td><span class="badge ${bCol}"><i class="fas ${icon}"></i> ${r.status}</span></td>
+            <td style="font-size: 0.85rem; color: var(--text-secondary);">${r.keterangan || '-'}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">${r.waktu_absen || '-'}</td>
+            <td><span class="badge" style="background: var(--bg-card);">${r.created_by || '-'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('histStart').addEventListener('change', loadHistory);
+    document.getElementById('histEnd').addEventListener('change', loadHistory);
+    document.getElementById('histStatus').addEventListener('change', loadHistory);
+    document.getElementById('histSearch').addEventListener('input', loadHistory);
+
+    loadHistory();
+  </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Siswa | ABSENSI KELAS X RPL 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon"><i class="fas fa-terminal"></i></div>
+        <div class="sidebar-brand-text"><h2>X RPL 1</h2><span>SMKN 1 PROBOLINGGO</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Menu Utama</div>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="absensi.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Absensi Hari Ini</span></a>
+        <a href="siswa.html" class="nav-item active"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+        <a href="riwayat.html" class="nav-item"><i class="fas fa-history"></i><span>Riwayat Absensi</span></a>
+        <a href="laporan.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Laporan & Rekap</span></a>
+        <div class="nav-label" style="margin-top: 14px;">Pengaturan</div>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i><span>Profil Pengguna</span></a>
+        <a href="javascript:void(0)" onclick="AbsensiDB.logout()" class="nav-item" style="color: var(--status-alpa);"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name" id="sidebarName">Pengguna</div>
+            <span class="user-role-badge" id="sidebarRole">ROLE</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title"><h1>Data Siswa Kelas X RPL 1</h1><p>SMKN 1 Probolinggo</p></div>
+        </div>
+        <div class="topbar-right">
+          <div class="online-indicator"><div class="pulse-dot"></div><span>Sistem Online</span></div>
+          <div class="clock-widget"><i class="far fa-clock"></i><span id="liveClock">--:--:-- WIB</span></div>
+          <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+              <span class="badge" style="background-color: var(--bg-card); font-size: 0.85rem; padding: 6px 14px;">
+                <i class="fas fa-users" style="color: var(--primary);"></i> Total: <strong id="cntSiswa" style="margin-left: 4px;">0</strong>
+              </span>
+              <span class="badge badge-gender-l" style="font-size: 0.85rem; padding: 6px 14px;">
+                <i class="fas fa-mars"></i> Laki-laki: <strong id="cntLaki" style="margin-left: 4px;">0</strong>
+              </span>
+              <span class="badge badge-gender-p" style="font-size: 0.85rem; padding: 6px 14px;">
+                <i class="fas fa-venus"></i> Perempuan: <strong id="cntPerem" style="margin-left: 4px;">0</strong>
+              </span>
+            </div>
+
+            <div id="waliActions" style="display: none; gap: 10px;">
+              <button class="btn btn-secondary" onclick="openModal('importCsvModal')"><i class="fas fa-file-csv"></i> Import CSV</button>
+              <button class="btn btn-primary" onclick="openModal('addModal')"><i class="fas fa-user-plus"></i> Tambah Siswa</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+            <div class="input-icon-wrapper" style="max-width: 320px; flex: 1;">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchSiswa" class="form-control" placeholder="Cari nama atau NIS siswa...">
+            </div>
+            <select id="filterGender" class="form-control" style="width: 150px; padding: 8px 12px;">
+              <option value="">Semua (L & P)</option>
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No</th>
+                  <th style="width: 100px;">NIS</th>
+                  <th>Nama Lengkap</th>
+                  <th style="width: 140px;">Jenis Kelamin</th>
+                  <th style="width: 120px;">Kelas</th>
+                  <th style="width: 120px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="siswaTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-backdrop" id="addModal">
+    <div class="modal-dialog">
+      <div class="modal-header"><h3><i class="fas fa-user-plus"></i> Tambah Siswa</h3><button class="modal-close-btn" onclick="closeModal('addModal')">&times;</button></div>
+      <form id="addForm">
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">NIS</label><input type="text" id="addNis" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Nama Siswa</label><input type="text" id="addNama" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Jenis Kelamin</label><select id="addJK" class="form-control"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editModal">
+    <div class="modal-dialog">
+      <div class="modal-header"><h3><i class="fas fa-edit"></i> Edit Siswa</h3><button class="modal-close-btn" onclick="closeModal('editModal')">&times;</button></div>
+      <form id="editForm">
+        <input type="hidden" id="editId">
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">NIS</label><input type="text" id="editNis" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Nama Siswa</label><input type="text" id="editNama" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Jenis Kelamin</label><select id="editJK" class="form-control"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">Perbarui</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = AbsensiDB.requireAuth();
+
+    // Theme & Clock
+    const savedTheme = localStorage.getItem('absensi_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('absensi_theme', nxt);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); backdrop.classList.toggle('active'); });
+    backdrop.addEventListener('click', () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); });
+
+    if (user) {
+      document.getElementById('sidebarName').textContent = user.nama;
+      document.getElementById('sidebarAvatar').textContent = user.nama[0];
+      document.getElementById('sidebarRole').textContent = user.role === 'wali_kelas' ? 'WALI KELAS' : 'KETUA KELAS';
+      if (user.role === 'wali_kelas') {
+        document.getElementById('waliActions').style.display = 'flex';
+      }
+    }
+
+    function showToast(title, msg, type = 'success') {
+      const cont = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${msg}</div></div>`;
+      cont.appendChild(t);
+      setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    window.openModal = id => document.getElementById(id).classList.add('active');
+    window.closeModal = id => document.getElementById(id).classList.remove('active');
+
+    function loadSiswa() {
+      const search = document.getElementById('searchSiswa').value;
+      const gender = document.getElementById('filterGender').value;
+      const list = AbsensiDB.getStudents(search, gender);
+
+      document.getElementById('cntSiswa').textContent = list.length;
+      document.getElementById('cntLaki').textContent = list.filter(s => s.jenis_kelamin === 'L').length;
+      document.getElementById('cntPerem').textContent = list.filter(s => s.jenis_kelamin === 'P').length;
+
+      const tbody = document.getElementById('siswaTableBody');
+      const isWali = user && user.role === 'wali_kelas';
+
+      tbody.innerHTML = list.map((s, idx) => `
+        <tr>
+          <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
+          <td style="font-family: monospace; font-weight: 600; color: var(--accent-cyan);">${s.nis}</td>
+          <td style="font-weight: 600;">${s.nama}</td>
+          <td><span class="badge ${s.jenis_kelamin === 'L' ? 'badge-gender-l' : 'badge-gender-p'}">${s.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span></td>
+          <td><span class="badge" style="background: var(--bg-card);">${s.kelas}</span></td>
+          <td>
+            ${isWali ? `
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary btn-sm" onclick="editSiswa(${s.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" onclick="deleteSiswa(${s.id}, '${s.nama}')"><i class="fas fa-trash-alt"></i></button>
+              </div>
+            ` : '<span style="font-size: 0.8rem; color: var(--text-muted);">View-only</span>'}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.editSiswa = id => {
+      const s = AbsensiDB.getStudents().find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('editId').value = s.id;
+      document.getElementById('editNis').value = s.nis;
+      document.getElementById('editNama').value = s.nama;
+      document.getElementById('editJK').value = s.jenis_kelamin;
+      openModal('editModal');
+    };
+
+    window.deleteSiswa = (id, nama) => {
+      if (confirm(`Yakin ingin menghapus ${nama}?`)) {
+        const res = AbsensiDB.deleteStudent(id);
+        showToast('Berhasil', res.message);
+        loadSiswa();
+      }
+    };
+
+    document.getElementById('addForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const res = AbsensiDB.addStudent({
+        nis: document.getElementById('addNis').value.trim(),
+        nama: document.getElementById('addNama').value.trim(),
+        jenis_kelamin: document.getElementById('addJK').value
+      });
+      if (res.success) {
+        showToast('Berhasil', res.message);
+        closeModal('addModal');
+        e.target.reset();
+        loadSiswa();
+      } else {
+        alert(res.message);
+      }
+    });
+
+    document.getElementById('editForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editId').value;
+      const res = AbsensiDB.updateStudent(id, {
+        nis: document.getElementById('editNis').value.trim(),
+        nama: document.getElementById('editNama').value.trim(),
+        jenis_kelamin: document.getElementById('editJK').value
+      });
+      if (res.success) {
+        showToast('Berhasil', res.message);
+        closeModal('editModal');
+        loadSiswa();
+      } else {
+        alert(res.message);
+      }
+    });
+
+    document.getElementById('searchSiswa').addEventListener('input', loadSiswa);
+    document.getElementById('filterGender').addEventListener('change', loadSiswa);
+
+    loadSiswa();
+  </script>
+</body>
+</html>
